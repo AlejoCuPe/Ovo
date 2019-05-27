@@ -8,7 +8,9 @@ const int entradas[tamanoTablero][tamanoTablero] = {
   {2, 3, 4, 5, 6, 7},
   {8, 9, 10, 11, 12, 13},
   {22, 23, 24, 25, 26, 27},
-  {28, 29, 30, 31, 32, 33}
+  {28, 29, 30, 31, 32, 33},
+  {34, 35, 36, 37, 38, 39},
+  {40, 41, 42, 43, 44, 45}
 };
 
 // La RX no pasa nada PERO con la TX se jode por que se intenta
@@ -53,7 +55,7 @@ void loop()
     if (cantidadJugadores != 0) {
       enJuego = true;
       configurarTablero(cantidadJugadores);
-      String mensajeInicio = "INICIO:";
+      String mensajeInicio = "I:";
       mensajeInicio.concat(cantidadJugadores);
       Serial.println(mensajeInicio);
       delay(1000);
@@ -66,10 +68,10 @@ void loop()
 
     // Registrar movimiento
     registroMovimiento();
-    delay(1000);
+    delay(100);
     identificarLlegada();
 
-    delay(3000);
+    delay(300);
 
   }
 
@@ -92,6 +94,7 @@ void registroMovimiento() {
         // De donde se partio
         partidaI = i;
         partidaJ = j;
+        
         break;
       }
     }
@@ -117,27 +120,17 @@ void identificarLlegada() {
           finI = i;
           finJ = j;
 
-          String mensajeMovimiento = "MOVIMIENTO:";
+          String mensajeMovimiento = "M:";
           mensajeMovimiento.concat(partidaI);
-          mensajeMovimiento.concat(",");
           mensajeMovimiento.concat(partidaJ);
-          mensajeMovimiento.concat(":");
+          
+          mensajeMovimiento.concat("F:");
           mensajeMovimiento.concat(finI);
-          mensajeMovimiento.concat(",");
           mensajeMovimiento.concat(finJ);
+
+
           Serial.println(mensajeMovimiento);
           delay(5000);
-          //          Serial.print("Partida i ");
-          //          Serial.print(partidaI);
-          //          Serial.print(", j ");
-          //          Serial.print(partidaJ);
-          //          Serial.println("------");
-          //
-          //          Serial.print("fin i ");
-          //          Serial.print(finI);
-          //          Serial.print(", j ");
-          //          Serial.print(finJ);
-          //          Serial.println("------");
           break;
         }
       }
@@ -170,12 +163,27 @@ byte identificarJugadores() {
   } else {
     suma = 0;
     // Chequear los 4
-    byte sj0 = posJugadores(0, 0);
-    byte sj1 = posJugadores(0, tamanoTablero - areaBusqueda);
-    byte sj2 = posJugadores(tamanoTablero - areaBusqueda, 0);
-    byte sj3 = posJugadores(tamanoTablero - areaBusqueda, tamanoTablero - areaBusqueda);
-    suma = sj0 + sj1 + sj2 + sj3;
-    num = (suma == 16) ? 4 : 0;
+    boolean sj0 = (digitalRead(entradas[0][0]) && digitalRead(entradas[0][1]) && digitalRead(entradas[1][0]) && digitalRead(entradas[1][1]));
+//    Serial.print("SJ0->");
+//    Serial.println(sj0);
+    delay(10);
+    
+    boolean sj1 = (digitalRead(entradas[0][4]) && digitalRead(entradas[0][5]) && digitalRead(entradas[1][4]) && digitalRead(entradas[1][5]));
+//    Serial.print("SJ1->");
+//    Serial.println(sj1);
+    delay(10);
+    
+    boolean sj2 = (digitalRead(entradas[4][0]) && digitalRead(entradas[4][1]) && digitalRead(entradas[5][0]) && digitalRead(entradas[5][1]));
+//    Serial.print("SJ2->");
+//    Serial.println(sj2);
+    delay(10);
+    
+    boolean sj3 = (digitalRead(entradas[4][4]) && digitalRead(entradas[4][5]) && digitalRead(entradas[5][4]) && digitalRead(entradas[5][5]));
+//    Serial.print("SJ3->");
+//    Serial.println(sj3);
+    delay(10);
+    num = (sj0 && sj1 && sj2 && sj3) ? 4 : 0;
+    delay(3000);
   }
 
   return num;
