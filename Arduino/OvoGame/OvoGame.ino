@@ -55,11 +55,12 @@ void loop()
     if (cantidadJugadores != 0) {
       enJuego = true;
       configurarTablero(cantidadJugadores);
+    }
+    
       String mensajeInicio = "I:";
       mensajeInicio.concat(cantidadJugadores);
-      Serial.println(mensajeInicio);
-      delay(1000);
-    }
+      Serial.print(mensajeInicio);
+      delay(100);
 
   }
   if (enJuego) {
@@ -71,7 +72,7 @@ void loop()
     delay(100);
     identificarLlegada();
 
-    delay(300);
+    delay(100);
 
   }
 
@@ -129,8 +130,8 @@ void identificarLlegada() {
           mensajeMovimiento.concat(finJ);
 
 
-          Serial.println(mensajeMovimiento);
-          delay(5000);
+          Serial.print(mensajeMovimiento);
+          delay(100);
           break;
         }
       }

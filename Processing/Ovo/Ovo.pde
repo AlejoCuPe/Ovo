@@ -1,3 +1,10 @@
+import processing.serial.*;
+Serial myPort;  // The serial port
+
+// String desde el arduino
+String inBuffer = "";
+
+
 //Se crea instancia de clase Tablero
 Tablero tablero;
 
@@ -57,6 +64,10 @@ boolean twoPlayers = true;
 
 //Codigo que se ejecuta una vez
 void setup() {
+  // List all the available serial ports:
+  printArray(Serial.list());
+  // Open the port you are using at the rate you want:
+  myPort = new Serial(this, Serial.list()[2], 9600);  // COM6
   
   //Se determina el size del canvas (donde se dibuja todo)
   fullScreen();
@@ -112,20 +123,26 @@ void setup() {
 }
 
 //Funcion para simular diferentes escenarios sin Arduino
-void functionSimuladora(){
-  int rndPlayable = (int)random(0, 2);
-  playable = rndPlayable == 0 ? true : false;
+//void functionSimuladora(){
+//  int rndPlayable = (int)random(0, 2);
+//  playable = rndPlayable == 0 ? true : false;
   
-  if(playable){
-    int rndPlayers = (int)random(0, 2);
-    twoPlayers = rndPlayers == 0 ? true : false;
-  }
+//  if(playable){
+//    int rndPlayers = (int)random(0, 2);
+//    twoPlayers = rndPlayers == 0 ? true : false;
+//  }
   
-}
+//}
 
 
 //Codigo que se ejecuta en loop
 void draw() {
+  while (myPort.available() > 0) {
+    inBuffer = myPort.readString();   
+    if (inBuffer != null) {
+      println(inBuffer);
+    }
+  }
   
   playB = new Boton(play, 7*width/18, 3.5*height/6, width/4.5, width/4.5);
   
@@ -341,6 +358,21 @@ void drawMenu(){
       
       //Simular escenario (Si es jugable y el numero de jugadores), esto lo indicara Arduino
      // functionSimuladora();
+      println(inBuffer.length());
+      if(inBuffer.length() == 3){
+        
+        int cantidad = Integer.parseInt(Character.toString(inBuffer.charAt(2)));
+        println("Cantidad recibida ", cantidad);
+        if(cantidad == 2){
+          twoPlayers = true;
+          playable = true;
+        }else if(cantidad == 4){
+          twoPlayers = false;
+          playable = true;
+        }else{
+          playable = false;
+        }
+      }
       
       state = "verification";
     } 
