@@ -59,8 +59,8 @@ void loop()
     
       String mensajeInicio = "I:";
       mensajeInicio.concat(cantidadJugadores);
-      Serial.print(mensajeInicio);
-      delay(100);
+      Serial.println(mensajeInicio);
+      delay(500);
 
   }
   if (enJuego) {
@@ -130,8 +130,8 @@ void identificarLlegada() {
           mensajeMovimiento.concat(finJ);
 
 
-          Serial.print(mensajeMovimiento);
-          delay(100);
+          Serial.println(mensajeMovimiento);  // Como es con println \n esos son otros 2 caracteres
+          delay(500);
           break;
         }
       }

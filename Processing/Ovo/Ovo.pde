@@ -1,6 +1,6 @@
 import processing.serial.*;
 Serial myPort;  // The serial port
-
+int nl = 10;
 // String desde el arduino
 String inBuffer = "";
 
@@ -67,8 +67,8 @@ void setup() {
   // List all the available serial ports:
   printArray(Serial.list());
   // Open the port you are using at the rate you want:
-  myPort = new Serial(this, Serial.list()[2], 9600);  // COM6
-  
+  myPort = new Serial(this, Serial.list()[0], 9600);  // COM6
+  delay(200);
   //Se determina el size del canvas (donde se dibuja todo)
   fullScreen();
   
@@ -138,9 +138,9 @@ void setup() {
 //Codigo que se ejecuta en loop
 void draw() {
   while (myPort.available() > 0) {
-    inBuffer = myPort.readString();   
+    inBuffer = myPort.readStringUntil(nl);   
     if (inBuffer != null) {
-      println(inBuffer);
+      println("Buffer de entrada " + inBuffer);
     }
   }
   

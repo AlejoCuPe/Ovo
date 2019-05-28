@@ -1,3 +1,4 @@
+
 JSON arduino https://randomnerdtutorials.com/decoding-and-encoding-json-with-arduino-or-esp8266/
 
 Usar shift register https://www.brainy-bits.com/get-more-inputs-on-your-arduino-by-using-a-shift-register/
@@ -16,3 +17,14 @@ Oficial: https://www.arduino.cc/reference/en/language/variables/data-types/strin
 
 Sonido: http://pages.mtu.edu/~suits/notefreqs.html
 	https://www.instructables.com/id/Arduino-Harry-Potter-Theme-Song/
+
+
+Leer: https://www.instructables.com/id/Arduino-Function-Serialread-And-SerialreadString/
+
+Video-Proteus: https://www.youtube.com/watch?v=Y7Dv4bMZ0qU&list=PLJM_v1QD2L0kQww2PeapYWHEez_gJnoV0&index=4
+
+Simular: https://www.youtube.com/watch?v=OZt9e8VdJ8Q
+
+
+Conectar todo:
+https://learn.sparkfun.com/tutorials/connecting-arduino-to-processing/all
