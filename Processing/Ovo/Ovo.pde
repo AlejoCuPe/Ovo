@@ -1,4 +1,4 @@
-import processing.serial.*;
+import processing.serial.Serial;
 Serial myPort;  // The serial port
 int nl = 10;
 // String desde el arduino

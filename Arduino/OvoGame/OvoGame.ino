@@ -3,6 +3,14 @@
   https://www.baldengineer.com/tips/arduino-pinmode-on-analog-inputs
 */
 
+
+/*
+  Variables de configuracion del juego:
+  El arreglo de entradas me dice los pines digitales que se desean leer.
+  El arreglo de bytes llamado tablero me dice las posiciones en las cuales se tiene un 1, lo cual me indica que en esa posicion se encuentra un huevo.
+  Las variables de cantidad de jugadores me indica la cantidad de jugadores detectados
+  Las variables de partidoX me dicen la posicion de partida, es decir de donde se movio cierta ficha y asi las de finX me dicen a donde se movio.
+*/
 const byte tamanoTablero = 6;
 const int entradas[tamanoTablero][tamanoTablero] = {
   {2, 3, 4, 5, 6, 7},
@@ -13,26 +21,22 @@ const int entradas[tamanoTablero][tamanoTablero] = {
   {40, 41, 42, 43, 44, 45}
 };
 
-// La RX no pasa nada PERO con la TX se jode por que se intenta
-// comunicar
-
-/*
-  Para 2 jugadores seran jugador A y B, Para 4 seran jugador A,B,C Y D.
-*/
-
 byte tablero[tamanoTablero][tamanoTablero];
 byte cantidadJugadores = 0;
 boolean enJuego = false;
-byte areaBusqueda = 2;
 
 byte partidaI = 10;
 byte partidaJ = 10;
 byte finI;
 byte finJ;
 
+String inBuffer = "";
+
 void setup()
 {
+  // Se configura la comunicacion Serial a una tasa de baudios (bits per second) de 9600 ya que esta es la que se utiliza en las demas.
   Serial.begin(9600);
+  // Se define el modo de los pines de entrada, los cuales son todos digitales y como INPUT
   for (byte i = 0; i < tamanoTablero; i++) {
     for (byte j = 0; j < tamanoTablero; j++) {
       pinMode(entradas[i][j], INPUT);
@@ -42,25 +46,33 @@ void setup()
 
 void loop()
 {
-  //Serial.println(cantidadJugadores);
+  /*
+    Este es el loop principal en donde se pregunta si llegan datos al puerto serial, si la cantidad de jugadores al inicio es la correcta
+    y tambien se detectan los movimientos realizados
+  */
+  if (Serial.available() > 0) {
+    inBuffer = Serial.readStringUntil('\n');
+    //inBuffer = Serial.readStringUntil('\n');
+    if (inBuffer.length() > 0 && inBuffer[0] == 'R') {
+      cantidadJugadores = 0;
+    }
+  }
+
+
   if (cantidadJugadores == 0) {
     // Me puede regresar solo 2 o 4  0 para cuando no se halla seteado el juego
     cantidadJugadores = identificarJugadores();
 
-    /*
-      Serial.print("La cantidad de jugadores es: ");
-      Serial.println(cantidadJugadores);
-    */
     //enJuego = cantidadJugadores != 0 ? true : false;
     if (cantidadJugadores != 0) {
       enJuego = true;
       configurarTablero(cantidadJugadores);
     }
-    
-      String mensajeInicio = "I:";
-      mensajeInicio.concat(cantidadJugadores);
-      Serial.println(mensajeInicio);
-      delay(500);
+
+    String mensajeInicio = "I:";
+    mensajeInicio.concat(cantidadJugadores);
+    Serial.println(mensajeInicio);
+    delay(500);
 
   }
   if (enJuego) {
@@ -77,14 +89,12 @@ void loop()
   }
 
   //imprimirTablero();
-
   //imprimirValores();
 }
 
 /*
   Detectar el movimiento del huevo, comparando los valores en las posiciones dependiendo del turno
-  del jugador
-
+  del jugador y retorna los indices de partida del huevo
 */
 void registroMovimiento() {
   // Conocer partida
@@ -95,7 +105,7 @@ void registroMovimiento() {
         // De donde se partio
         partidaI = i;
         partidaJ = j;
-        
+
         break;
       }
     }
@@ -103,7 +113,9 @@ void registroMovimiento() {
 }
 
 /*
-  Identificacion de a donde se movio el huevo
+  Identificacion de a donde se movio el huevo, para esto se usan las variables/indices de partida y luego se envia
+  por comunicacion serial una cadena de texto la cual tiene el formato M:00F:11 para indicar que se movio una huevo
+  que se encontraba en fila 0 y columna 0 y llego a fila 1 columna1.
 
 */
 void identificarLlegada() {
@@ -124,7 +136,7 @@ void identificarLlegada() {
           String mensajeMovimiento = "M:";
           mensajeMovimiento.concat(partidaI);
           mensajeMovimiento.concat(partidaJ);
-          
+
           mensajeMovimiento.concat("F:");
           mensajeMovimiento.concat(finI);
           mensajeMovimiento.concat(finJ);
@@ -143,7 +155,8 @@ void identificarLlegada() {
 
 /*
   Funcion para identificar la cantidad de jugadores, viendo si en ciertas areas del tablero al iniciar se encuentran
-  posicionandos los huevos.
+  posicionados los huevos.
+  Retorna la cantidad de jugadores detectados.
 */
 byte identificarJugadores() {
   byte num = 0;
@@ -165,23 +178,23 @@ byte identificarJugadores() {
     suma = 0;
     // Chequear los 4
     boolean sj0 = (digitalRead(entradas[0][0]) && digitalRead(entradas[0][1]) && digitalRead(entradas[1][0]) && digitalRead(entradas[1][1]));
-//    Serial.print("SJ0->");
-//    Serial.println(sj0);
+    //    Serial.print("SJ0->");
+    //    Serial.println(sj0);
     delay(10);
-    
+
     boolean sj1 = (digitalRead(entradas[0][4]) && digitalRead(entradas[0][5]) && digitalRead(entradas[1][4]) && digitalRead(entradas[1][5]));
-//    Serial.print("SJ1->");
-//    Serial.println(sj1);
+    //    Serial.print("SJ1->");
+    //    Serial.println(sj1);
     delay(10);
-    
+
     boolean sj2 = (digitalRead(entradas[4][0]) && digitalRead(entradas[4][1]) && digitalRead(entradas[5][0]) && digitalRead(entradas[5][1]));
-//    Serial.print("SJ2->");
-//    Serial.println(sj2);
+    //    Serial.print("SJ2->");
+    //    Serial.println(sj2);
     delay(10);
-    
+
     boolean sj3 = (digitalRead(entradas[4][4]) && digitalRead(entradas[4][5]) && digitalRead(entradas[5][4]) && digitalRead(entradas[5][5]));
-//    Serial.print("SJ3->");
-//    Serial.println(sj3);
+    //    Serial.print("SJ3->");
+    //    Serial.println(sj3);
     delay(10);
     num = (sj0 && sj1 && sj2 && sj3) ? 4 : 0;
     delay(3000);
@@ -190,15 +203,7 @@ byte identificarJugadores() {
   return num;
 }
 
-byte posJugadores(byte idxI, byte idxJ) {
-  byte suma = 0;
-  for (byte i = idxI; i < idxI + areaBusqueda; i++ ) {
-    for (byte j = idxJ; j < idxJ + areaBusqueda; j++) {
-      suma += digitalRead(entradas[i][j]);
-    }
-  }
-  return suma;
-}
+
 
 void imprimirValores() {
   for (byte i = 0; i < tamanoTablero ; i++) {
@@ -232,13 +237,27 @@ void imprimirTablero() {
   }
 }
 
+
+/*
+  Funcion para inicializar todo en el tablero para que luego se puedan detectar los cambios. En esta funcion se
+  dependiendo de la cantidad de jugadores se setea el tablero para tener 1 en ciertas posicione
+
+*/
 void configurarTablero(byte jugadores) {
+
+  // Poner todos a cero
+  for (byte i = 0; i < tamanoTablero; i++) {
+    for (byte j = 0; j < tamanoTablero; j++) {
+      tablero[i][j] =  0;
+    }
+  }
+
   if (jugadores == 2) {
     for (byte j = 0; j < tamanoTablero; j++) {
       tablero[0][j] = 1;
       tablero[tamanoTablero - 1][j] = 1;
     }
-  } else {
+  } else if (jugadores == 4) {
 
     tablero[0][0] = 1;
     tablero[0][1] = 1;
@@ -259,7 +278,7 @@ void configurarTablero(byte jugadores) {
     tablero[4][5] = 1;
     tablero[5][4] = 1;
     tablero[5][5] = 1;
-    
+
   }
 
 }
