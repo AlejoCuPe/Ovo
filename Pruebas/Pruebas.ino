@@ -40,7 +40,7 @@ void loop()
       Serial.println(indice);
       indice++;
       
-      delay(6000);
+      delay(1000);
     }
   }  
 }

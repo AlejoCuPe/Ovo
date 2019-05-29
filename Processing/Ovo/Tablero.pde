@@ -18,7 +18,7 @@ class Tablero {
   //Identificador del jugador que va a mover
   int playerId = 1;
   //Ficha elegida para mover
-  Ficha selectedF;
+  Ficha selectedF = null;
   //Identificador del jugador que gana
   int winner = 0;
   //Permite saber si el juego ha acabado
@@ -184,8 +184,8 @@ class Tablero {
     for(Ficha f: fichas){
       f.mostrar();
       if(f.playerId == playerId || f.isHidden){
-        if(f.clicked()){ selectedF = f;
-          checkMoves(f.posicion); }
+        if(selectedF != null){ 
+          checkMoves(selectedF.posicion); }
       }
     }
     
@@ -325,11 +325,14 @@ class Tablero {
     }else{
       println("AUN NO SE PUEDE TERMINAR EL JUEGO");
     }
+      println("AUN NO SE PUEDE TERMINAR EL JUEGO");
       
   }
   
   
   void terminar(int winner){
+    
+    ended = true;
     
     for(Casilla[] c: casillas){
       //por cada casilla en cada fila...
@@ -388,7 +391,14 @@ class Tablero {
   }
   
   //Resetear valores del tablero
-  
+  Ficha getFicha(String id){
+    for(Ficha f : fichas){    
+      if(id.equals(f.posicion)){
+         return f;     
+      } 
+    }   
+    return null;
+  }
  
   
   //Verificar movimientos validos

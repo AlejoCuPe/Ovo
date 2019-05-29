@@ -1,4 +1,4 @@
-import processing.serial.Serial;
+  import processing.serial.Serial;
 Serial myPort;  // The serial port
 int nl = 10;
 // String desde el arduino
@@ -67,7 +67,7 @@ void setup() {
   // List all the available serial ports:
   printArray(Serial.list());
   // Open the port you are using at the rate you want:
-  myPort = new Serial(this, Serial.list()[0], 9600);  // COM6
+  myPort = new Serial(this, Serial.list()[3], 9600);  // COM6
   delay(200);
   //Se determina el size del canvas (donde se dibuja todo)
   fullScreen();
@@ -137,12 +137,30 @@ void setup() {
 
 //Codigo que se ejecuta en loop
 void draw() {
+
   while (myPort.available() > 0) {
-    inBuffer = myPort.readStringUntil(nl);   
+    inBuffer = myPort.readStringUntil(nl);  // Leer string hasta el \n
     if (inBuffer != null) {
-      println("Buffer de entrada " + inBuffer);
+      println("Buffer de entrada tamaño " + inBuffer.length());
+      println(inBuffer);
+      if(inBuffer.length() == 6){
+        
+        if(Character.toString(inBuffer.charAt(0)).equals("M")){
+          tablero.selectedF = tablero.getFicha(Character.toString(inBuffer.charAt(2))+Character.toString(inBuffer.charAt(3)));
+          println(Character.toString(inBuffer.charAt(2))+Character.toString(inBuffer.charAt(3)));    
+      }
+      
+      if(Character.toString(inBuffer.charAt(0)).equals("F")){
+          tablero.moverFicha(tablero.selectedF, tablero.getCasilla(Character.toString(inBuffer.charAt(2))+Character.toString(inBuffer.charAt(3))));
+          tablero.selectedF = null;
+          println("F: "+Character.toString(inBuffer.charAt(2))+Character.toString(inBuffer.charAt(3)));    
+      }
+        
+      }
+      
     }
   }
+
   
   playB = new Boton(play, 7*width/18, 3.5*height/6, width/4.5, width/4.5);
   
@@ -210,6 +228,22 @@ int aWinCounter;
 //Parte que dibuja la verificacion
 void verify(){
   
+      if(inBuffer.length() == 5){
+        
+        int cantidad = 0;
+        cantidad = Integer.parseInt(Character.toString(inBuffer.charAt(2)));
+        println("Cantidad recibida "+ cantidad);
+        if(cantidad == 2){
+          twoPlayers = true;
+          playable = true;
+        }else if(cantidad == 4){
+          twoPlayers = false;
+          playable = true;
+        }else if(cantidad == 0){
+          playable = false;
+        }
+      }
+  
   //Rectangulo que oscurece fondo
   noStroke();
   fill(50, 50, 50, 100);
@@ -249,6 +283,7 @@ void verify(){
       if(verifyB.clicked()){
         state = "game";
         tablero.setTablero();
+        myPort.write('C');
       }
     
   }else{
@@ -356,23 +391,14 @@ void drawMenu(){
     }else{
       playB.onClic(playP);
       
+      myPort.write("P"); 
+      println("Se manda a pedir la cantidad de jugadores");
+      //delay(200);
+      // Pedir la cantidad de jugadores
       //Simular escenario (Si es jugable y el numero de jugadores), esto lo indicara Arduino
      // functionSimuladora();
-      println(inBuffer.length());
-      if(inBuffer.length() == 3){
-        
-        int cantidad = Integer.parseInt(Character.toString(inBuffer.charAt(2)));
-        println("Cantidad recibida ", cantidad);
-        if(cantidad == 2){
-          twoPlayers = true;
-          playable = true;
-        }else if(cantidad == 4){
-          twoPlayers = false;
-          playable = true;
-        }else{
-          playable = false;
-        }
-      }
+      //println(inBuffer.length());
+      
       
       state = "verification";
     } 
@@ -385,9 +411,18 @@ void drawMenu(){
 
 //Funcion que representa funcionalidad del juego
 void game(){
-  check.mostrar();
-  if(check.clicked()){
-    tablero.checkWinner(tablero.playerId);
-  }
-   tablero.mostrar();
+ // check.mostrar();
+  println(inBuffer.length());
+      if(inBuffer.length() == 5){
+        println(inBuffer.toString());
+        println(tablero.playerId);
+        if(Character.toString(inBuffer.charAt(2)).equals("N")){
+          tablero.checkWinner(tablero.playerId);
+            
+        } 
+      }
+ tablero.mostrar();
+ if(tablero.ended){
+   myPort.write("R");
+ }
 }
