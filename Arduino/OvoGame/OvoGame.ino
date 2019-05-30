@@ -97,7 +97,7 @@ void loop()
     }
   }
   
-  if (enJuego && tableroCreado) {
+  if (tableroCreado) {
     // Se comenzo/esta juegando
     //Serial.println(" Se inicia ya que se ocuparon los puestos");
 

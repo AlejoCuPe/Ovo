@@ -10,6 +10,10 @@ class Ficha extends Boton {
   //Permite saber si la ficha esta oculta
   boolean isHidden = false;
   
+  //Permite saber si la ficha se ha mostrado en el juego
+  boolean shown = false;
+  
+  
   //Permite colorear degradado
   int s;
   

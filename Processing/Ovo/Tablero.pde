@@ -19,10 +19,15 @@ class Tablero {
   int playerId = 1;
   //Ficha elegida para mover
   Ficha selectedF = null;
+  //Ficha cliqueada para ver
+  Ficha clickedF = null;
   //Identificador del jugador que gana
   int winner = 0;
   //Permite saber si el juego ha acabado
   boolean ended = false;
+  
+  //Timer de mostrar ficha
+  int timeR = 0;
     
   //Constructor con posicion centrada en el canvas
   Tablero (int size, color tColor) {
@@ -132,6 +137,9 @@ class Tablero {
     
   }
   
+  //Contador mostrar ficha
+  int countHidden = 0;
+  
   //Muestra y actualiza constantemente el tablero con sus casillas y fichas
   void mostrar(){
     
@@ -187,7 +195,28 @@ class Tablero {
         if(selectedF != null){ 
           checkMoves(selectedF.posicion); }
       }
+      if(f.isHidden && f.clicked()){ 
+        moverFicha(f, getCasilla(f.posicion));
+        f.setHidden(false);
+        clickedF = f;
+      }
     }
+    
+    //Mostrar numero de la ficha por un tiempo
+    if(clickedF != null){   
+      countHidden++; 
+      println(countHidden);
+        if(countHidden >= 5){
+        println("AAAAAAAAA");
+        getFicha(clickedF.posicion).setHidden(true);
+        clickedF = null;
+        countHidden = 0;
+      }
+    }
+    
+    
+    
+    
     
     if(this.winner != 0){
       terminar(this.winner);
@@ -220,6 +249,7 @@ class Tablero {
           break; 
         }
       }
+      
       f.mover(ca); 
       restart();
       asignarFichas();
@@ -247,9 +277,7 @@ class Tablero {
   void checkWinner(int playerId){
     
     
-        this.winner = playerId;
-    
-    //Verificar si todas las fichas estan volteadas
+   //Verificar si todas las fichas estan volteadas
     boolean allHidden = true;
     
     //Buscar si alguna ficha del jugador no esta escondida
@@ -312,9 +340,12 @@ class Tablero {
         if(counterC == fichasPPlayer){
           //Si todas las fichas escondidas son del jugador, gana
           if(counterH == fichasPPlayer){
+            this.winner = playerId;
             println("GANA EL JUGADOR "+playerId);
           //Si hay al menos una ficha escondida del jugador en las casillas del jugador y verifica la victoria, pierde.
           }else{
+            //Asignar al siguiente jugador como ganador
+            this.winner = playerId == 4 ? 1 : playerId + 1;
             println("PIERDE EL JUGADOR "+playerId);
           }
         //Si no todas las fichas estan escondidas no se puede hacer la verificacion de victoria
@@ -329,7 +360,7 @@ class Tablero {
       
   }
   
-  
+  //Metodo para terminar juego
   void terminar(int winner){
     
     ended = true;

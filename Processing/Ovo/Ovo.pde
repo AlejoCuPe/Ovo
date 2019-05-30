@@ -436,8 +436,8 @@ void game(){
  // check.mostrar();
   println(inBuffer.length());
       if(inBuffer.length() == 5){
-        println(inBuffer.toString());
-        println(tablero.playerId);
+        println("Buffer"+inBuffer.toString());
+        println("Turno"+tablero.playerId);
         if(Character.toString(inBuffer.charAt(2)).equals("N")){
           tablero.checkWinner(tablero.playerId);
             
