@@ -1,4 +1,5 @@
-  import processing.serial.Serial;
+import processing.serial.Serial;
+
 Serial myPort;  // The serial port
 int nl = 10;
 // String desde el arduino
@@ -47,6 +48,7 @@ PImage celeb2;
 PImage celeb3;
 PImage continuar;
 PImage continuarOH;
+PImage loading;
 
 //String que representa el estado del juego
 String state;
@@ -59,15 +61,15 @@ Boton check;
 Boton finish;
 
 //Variables de comunicacion con Arduino
-boolean playable = true;
-boolean twoPlayers = true;
+boolean playable;
+boolean twoPlayers;
 
 //Codigo que se ejecuta una vez
 void setup() {
   // List all the available serial ports:
   printArray(Serial.list());
   // Open the port you are using at the rate you want:
-  myPort = new Serial(this, Serial.list()[3], 9600);  // COM6
+  myPort = new Serial(this, Serial.list()[0], 9600);  // COM6
   delay(200);
   //Se determina el size del canvas (donde se dibuja todo)
   fullScreen();
@@ -111,6 +113,7 @@ void setup() {
   celeb3 = loadImage("celeb3.png");
   continuar = loadImage("continuar.png");
   continuarOH = loadImage("continuarOH.png");
+  loading = loadImage("Loading.png");
   
   state = "mainmenu";
   
@@ -223,17 +226,15 @@ int timeAnimationWin = 0;
 //Contador animaciones victoria
 int aWinCounter;
 
-
-
 //Parte que dibuja la verificacion
 void verify(){
   
-      if(inBuffer.length() == 5){
-        
+  //Verificar datos de numero de jugadores solicitado al Arduino
+  if(inBuffer.length() == 5){
         int cantidad = 0;
         cantidad = Integer.parseInt(Character.toString(inBuffer.charAt(2)));
-        println("Cantidad recibida "+ cantidad);
         if(cantidad == 2){
+          println("ENTROO");
           twoPlayers = true;
           playable = true;
         }else if(cantidad == 4){
@@ -243,6 +244,7 @@ void verify(){
           playable = false;
         }
       }
+  
   
   //Rectangulo que oscurece fondo
   noStroke();
@@ -254,50 +256,74 @@ void verify(){
   fill(240);
   rect(width/5, height/10, 0.6*width, 0.55*width, 100);
   
-  //Mostrar y agregar imagen al hover del boton de cerrar
-  closeB.onHover(closeOH);
-  closeB.mostrar();
-  
-  //Cambiar state a menu principal
-  if(closeB.clicked()){
-    state = "mainmenu";
-  }
-  
-   //Muestra texto segun si es jugable y cuantos jugadores son
-  if(playable){
+  println(playable);
+
+  //No dibujar hasta que se haya recibido numero de jugadores
+  if(inBuffer.length() == 5){
     
-    //Mostrar y agregar imagen al hover del boton de verificacion y mostrar Comenzar/Entendido segun sea el caso
-    verifyB.setImg(verifyC);
-    verifyB.onHover(verifyOHC);
-    verifyB.mostrar();
-    //
-    if(twoPlayers){
-      image(tPlayers, 9*width/40, 2*height/10, 0.55*width, 0.15*height);
-      image(text2players, 9*width/40, 4*height/10, 0.55*width, 0.35*height);
-    }else{
-      image(fPlayers, 9*width/40, 2*height/10, 0.55*width, 0.15*height);
-      image(text4players, 9*width/40, 4*height/10, 0.55*width, 0.35*height);
+    //Mostrar y agregar imagen al hover del boton de cerrar
+    closeB.onHover(closeOH);
+    closeB.mostrar();
+    
+    //Cambiar state a menu principal
+    if(closeB.clicked()){
+      state = "mainmenu";
+      inBuffer = "";
     }
     
-    //Cambiar state a game
-      if(verifyB.clicked()){
-        state = "game";
-        tablero.setTablero();
-        myPort.write('C');
+     //Muestra texto segun si es jugable y cuantos jugadores son
+    if(playable){
+      
+      //Mostrar y agregar imagen al hover del boton de verificacion y mostrar Comenzar/Entendido segun sea el caso
+      verifyB.setImg(verifyC);
+      verifyB.onHover(verifyOHC);
+      verifyB.mostrar();
+      //
+      if(twoPlayers){
+        image(tPlayers, 9*width/40, 2*height/10, 0.55*width, 0.15*height);
+        image(text2players, 9*width/40, 4*height/10, 0.55*width, 0.35*height);
+      }else{
+        image(fPlayers, 9*width/40, 2*height/10, 0.55*width, 0.15*height);
+        image(text4players, 9*width/40, 4*height/10, 0.55*width, 0.35*height);
       }
+      
+      //Cambiar state a game
+        if(verifyB.clicked()){
+          state = "game";
+          tablero.setTablero();
+          myPort.write('C');
+        }
+      
+    }else{
+        image(errorFichas, 9*width/40, 1.5*height/10, 0.55*width, 0.13*height);
+        image(textError, 9*width/40, 3*height/10, 0.55*width, 0.46*height);
+        
+        verifyB.setImg(verifyE);
+        verifyB.onHover(verifyOHE);
+        verifyB.mostrar();
+        
+        //Cambiar state a menu principal
+        if(verifyB.clicked()){
+          state = "mainmenu";
+        }
+    }
     
   }else{
-      image(errorFichas, 9*width/40, 1.5*height/10, 0.55*width, 0.13*height);
-      image(textError, 9*width/40, 3*height/10, 0.55*width, 0.46*height);
-      
-      verifyB.setImg(verifyE);
-      verifyB.onHover(verifyOHE);
-      verifyB.mostrar();
-      
-      //Cambiar state a menu principal
-      if(verifyB.clicked()){
-        state = "mainmenu";
-      }
+    
+    //Rectangulo que oscurece fondo
+    noStroke();
+    fill(50, 50, 50, 100);
+    rect(0, 0, width, height);
+    
+    //Rectangulo de interfaz
+    noStroke();
+    fill(240);
+    rect(width/5, height/10, 0.6*width, 0.55*width, 100);
+    
+     //Mostrar pantalla de carga
+    image(loading ,9*width/40, 3*height/20, 0.55*width, 0.50*width);
+   
+    
   }
   
 }
@@ -391,15 +417,11 @@ void drawMenu(){
     }else{
       playB.onClic(playP);
       
+      //Se solicita al Arduino el numero de jugadores
       myPort.write("P"); 
-      println("Se manda a pedir la cantidad de jugadores");
-      //delay(200);
-      // Pedir la cantidad de jugadores
-      //Simular escenario (Si es jugable y el numero de jugadores), esto lo indicara Arduino
-     // functionSimuladora();
-      //println(inBuffer.length());
+      println("Se manda a pedir la cantidad de jugadores");    
       
-      
+          
       state = "verification";
     } 
   }

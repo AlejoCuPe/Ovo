@@ -33,6 +33,8 @@ byte partidaJ = 10;
 byte finI;
 byte finJ;
 
+
+int peticiones = 0;
 String inBuffer = "";
 
 byte botonFin = A15;
@@ -58,6 +60,21 @@ void loop()
     delay(200);
 
   }
+
+
+  //Serial.println(cantidadJugadores);
+  if (cantidadJugadores == 0) {
+    // Me puede regresar solo 2 o 4 o 0 para cuando no se halla seteado el juego
+    cantidadJugadores = identificarJugadores();
+
+    //enJuego = cantidadJugadores != 0 ? true : false;
+    if (cantidadJugadores != 0) {
+      enJuego = true;
+      configurarTablero(cantidadJugadores);
+    }
+
+  }
+  
   if (Serial.available() > 0) {
     //inBuffer = Serial.read();
     inBuffer = Serial.readStringUntil('\n');
@@ -71,36 +88,15 @@ void loop()
       Serial.println("SE CREA EL TABLERO DEL JUEGO");
     }
     if (inBuffer.length() > 0 && inBuffer[0] == 'P') {
-      peticionJugadores = true;
+     // peticionJugadores = true;
+      cantidadJugadores = identificarJugadores();
       String mensajeInicio = "I:";
       mensajeInicio.concat(cantidadJugadores);
       Serial.println(mensajeInicio);
       delay(200);
     }
   }
-
-  //Serial.println(cantidadJugadores);
-  if (cantidadJugadores == 0) {
-    // Me puede regresar solo 2 o 4  0 para cuando no se halla seteado el juego
-    cantidadJugadores = identificarJugadores();
-
-    /*
-      Serial.print("La cantidad de jugadores es: ");
-      Serial.println(cantidadJugadores);
-    */
-    //enJuego = cantidadJugadores != 0 ? true : false;
-    if (cantidadJugadores != 0) {
-      enJuego = true;
-      configurarTablero(cantidadJugadores);
-    }
-
-
-//      String mensajeInicio = "I:";
-//      mensajeInicio.concat(cantidadJugadores);
-//      Serial.println(mensajeInicio);
-//      delay(200);
-
-  }
+  
   if (enJuego && tableroCreado) {
     // Se comenzo/esta juegando
     //Serial.println(" Se inicia ya que se ocuparon los puestos");
